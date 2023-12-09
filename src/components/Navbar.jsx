@@ -2,31 +2,18 @@ import { BsCart3, BsMoonFill, BsSunFill } from 'react-icons/bs';
 import { FaBarsStaggered } from 'react-icons/fa6';
 import { NavLink } from 'react-router-dom';
 import { NavLinks } from './index.js';
-import { useEffect, useState } from 'react';
 
-const themes = {
-  winter: 'winter',
-  dracula: 'dracula',
-  business: 'business',
-};
-
-const getThemeFromLocalStorage = () => {
-  return localStorage.getItem('theme') || themes.winter;
-};
+import { useDispatch, useSelector } from 'react-redux';
+import { toggleTheme } from '../features/user/UserSlice.js';
 
 const Navbar = () => {
-  const [theme, setTheme] = useState(getThemeFromLocalStorage);
-  const handleTheme = () => {
-    const { winter, dracula } = themes;
-    const newTheme = theme === winter ? dracula : winter;
+  const dispatch = useDispatch();
 
-    setTheme(newTheme);
+  const handleTheme = () => {
+    dispatch(toggleTheme());
   };
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+  const numItemsInCart = useSelector((state) => state.cartState.numItemsInCart);
 
   return (
     <nav className='bg-base-200'>
@@ -71,7 +58,7 @@ const Navbar = () => {
             <div className='indicator'>
               <BsCart3 className='h-6 w-6' />
               <span className='badge badge-sm badge-primary indicator-item'>
-                99
+                {numItemsInCart}
               </span>
             </div>
           </NavLink>

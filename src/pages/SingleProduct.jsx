@@ -2,14 +2,27 @@ import { useLoaderData } from 'react-router-dom';
 import { formatPrice, customFetch, generateAmountOptions } from '../utils';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { addItem } from '../features/cart/cartSlice';
 
-export const loader = async ({ params }) => {
-  const url = '/products/';
-  const response = await customFetch(`${url}${params.id}`);
-  const singleProduct = response.data.data;
-  // console.log(singleProduct);
-  return { singleProduct };
+const singleProductQuery = (id) => {
+  return {
+    queryKey: ['singleProduct', id],
+    queryFn: () => customFetch(`/products/${id}`),
+  };
 };
+
+export const loader =
+  (queryClient) =>
+  async ({ params }) => {
+    const url = '/products/';
+    const response = await queryClient.ensureQueryData(
+      singleProductQuery(params.id)
+    );
+    const singleProduct = response.data.data;
+    // console.log(singleProduct);
+    return { singleProduct };
+  };
 
 const SingleProduct = () => {
   const { singleProduct } = useLoaderData();
@@ -25,6 +38,23 @@ const SingleProduct = () => {
 
   const handleAmount = (e) => {
     setAmount(parseInt(e.target.value));
+  };
+
+  const cartProduct = {
+    cartID: productColor.id + productColor.color,
+    productID: productColor.id,
+    image,
+    title,
+    price,
+    company,
+    productColor,
+    amount,
+  };
+
+  const dispatch = useDispatch();
+
+  const addToCart = () => {
+    dispatch(addItem({ product: cartProduct }));
   };
 
   return (
@@ -101,7 +131,7 @@ const SingleProduct = () => {
         <div className='mt-10'>
           <button
             className='btn btn-secondary btn-md uppercase'
-            onClick={() => console.log('add to bag')}
+            onClick={addToCart}
           >
             add to bag
           </button>
